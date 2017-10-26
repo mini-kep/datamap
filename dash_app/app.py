@@ -72,9 +72,11 @@ def get_from_api_datapoints(freq, name):
 app.layout = html.Div([
     dcc.RadioItems(
         options=frequencies(),
+        value='a',
         id='frequency'
     ),
-    dcc.Dropdown(id='names'),
+    dcc.Dropdown(id='name1', value="GDP_yoy"),
+    dcc.Dropdown(id='name2'),
     dcc.Graph(id='time-series-graph')    
 ], style={'width': '500'})
 
@@ -82,25 +84,85 @@ app.layout = html.Div([
 # NOT TODO: may have - when page is loaded, some graph already shows by default  
 #           eg GDP_yoy + q
 
-@app.callback(output=Output('names', component_property='options'), 
+
+# NOT TODO: add second graph
+    
+@app.callback(output=Output('name1', component_property='options'), 
               inputs=[Input('frequency', component_property='value')])
-def update_names(freq):
+def update_names1(freq):
     return get_from_api_names(freq)
 
-# NOT TODO: similar behaviour can be done with events?
+
+@app.callback(output=Output('name2', component_property='options'), 
+              inputs=[Input('frequency', component_property='value')])
+def update_names2(freq):
+    return get_from_api_names(freq)
+
 
 @app.callback(output=Output('time-series-graph', 'figure'),
               inputs=[Input('frequency', component_property='value'), 
-                      Input('names', component_property='value')])
-def update_graph(freq, name):
-        data =  get_from_api_datapoints(freq, name)
+                      Input('name1', component_property='value'),
+                      #Input('name2', component_property='value'),                      
+                      ])    
+def update_graph(freq, name1, name2=None):
+        data1 = get_from_api_datapoints(freq, name1)
+        #data2 = get_from_api_datapoints(freq, name2)
         return {
             'data': [{
-                'x': [d['date'] for d in data],
-                'y': [d['value'] for d in data]
-            }],
+                'x': [d['date'] for d in data1],
+                'y': [d['value'] for d in data1]
+                 },    
+#    {
+#                'x': [d['date'] for d in data2],
+#                'y': [d['value'] for d in data2]
+#                 }    
+    ],
             'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}}
-        }
+}
+
+
+# FIXME: dates are wrong on x axis
+#        when pointing mouse to graph the dates, they seem ok 
+    
+#  File "C:\Users\PogrebnyakEV\Desktop\mini-kep\dash\dash_app\app.py", line 99, in <listcomp>
+#    'x': [d['date'] for d in data],
+#TypeError: string indices must be integers
+#127.0.0.1 - - [26/Oct/2017 11:24:02] "POST /_dash-update-component HTTP/1.1" 200 -
+#127.0.0.1 - - [26/Oct/2017 11:24:11] "POST /_dash-update-component HTTP/1.1" 200 -
+#127.0.0.1 - - [26/Oct/2017 11:24:19] "POST /_dash-update-component HTTP/1.1" 500 -
+#Traceback (most recent call last):
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1994, in __call__
+#    return self.wsgi_app(environ, start_response)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1985, in wsgi_app
+#    response = self.handle_exception(e)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1540, in handle_exception
+#    reraise(exc_type, exc_value, tb)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\_compat.py", line 33, in reraise
+#    raise value
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1982, in wsgi_app
+#    response = self.full_dispatch_request()
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1614, in full_dispatch_request
+#    rv = self.handle_user_exception(e)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1517, in handle_user_exception
+#    reraise(exc_type, exc_value, tb)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\_compat.py", line 33, in reraise
+#    raise value
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1612, in full_dispatch_request
+#    rv = self.dispatch_request()
+#  File "D:\Continuum\Anaconda3\lib\site-packages\flask\app.py", line 1598, in dispatch_request
+#    return self.view_functions[rule.endpoint](**req.view_args)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\dash\dash.py", line 541, in dispatch
+#    return self.callback_map[target_id]['callback'](*args)
+#  File "D:\Continuum\Anaconda3\lib\site-packages\dash\dash.py", line 498, in add_context
+#    output_value = func(*args, **kwargs)
+#  File "C:\Users\PogrebnyakEV\Desktop\mini-kep\dash\dash_app\app.py", line 99, in update_graph
+#    'x': [d['date'] for d in data],
+#  File "C:\Users\PogrebnyakEV\Desktop\mini-kep\dash\dash_app\app.py", line 99, in <listcomp>
+#    'x': [d['date'] for d in data],
+#TypeError: string indices must be integers
+
+
+
 
 
 
