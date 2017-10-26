@@ -30,7 +30,7 @@ app = dash.Dash()
 # NOT TODO: may be a class Data with 
 # - Data.names() 
 # - data.time_series(freq, name) 
-# - frequencies(freq, name)
+# - frequencies()
 
 # NOT TODO: frequencies can be imported from db API
 #           see for example 
@@ -136,27 +136,5 @@ def update_graph_parameters(freq, name1, name2):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)         
+    app.run_server(debug=True)           
     
-    
-# EP: parts of dash code seem work in progress
-# > help(app)    
-
-#    class Dash(builtins.object)
-# |  Methods defined here:
-# |  
-# |  __init__(self, name=None, server=None, static_folder=None, url_base_pathname='/', **kwargs)
-# |      Initialize self.  See help(type(self)) for accurate signature.
-# |  
-# |  callback(self, output, inputs=[], state=[], events=[])
-# |      # TODO - Update nomenclature.
-# |      # "Parents" and "Children" should refer to the DOM tree
-# |      # and not the dependency tree.
-# |      # The dependency tree should use the nomenclature
-# |      # "observer" and "controller".
-# |      # "observers" listen for changes from their "controllers". For example,
-# |      # if a graph depends on a dropdown, the graph is the "observer" and the
-# |      # dropdown is a "controller". In this case the graph's "dependency" is
-# |      # the dropdown.
-# |      # TODO - Check this map for recursive or other ill-defined non-tree
-# |      # relationships
