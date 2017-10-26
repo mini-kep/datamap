@@ -122,15 +122,18 @@ def update_graph_parameters(freq, name1, name2):
 
 # NOT TODO: can deploy to heroku?
 
-# NOT TODO: add second dropdown menu and secdond variable to graph?
-
 # NOT TODO: in newer versions - split this list to priority and requires something
+# Must split list below to features requiring API change and not.
+#
+# Components:
 # - sections of variables ('GDP Components', 'Prices'...) 
 # - download this data as....
 # - human varname description in Russian/English
 # - more info about variables as text
 # - show latest value
 # - link to github <https://github.com/mini-kep/intro>
+#
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)         
