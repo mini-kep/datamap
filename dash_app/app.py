@@ -32,21 +32,32 @@ def frequencies():
     ]
 
 
+# NOT TODO: may be a class Data with Data.names() and data.time_series(freq, name) 
+    
 BASE_URL = 'http://minikep-db.herokuapp.com/api'
 
-def names(freq):
+def get_from_api_names(freq):
     url = f'{BASE_URL}/names/{freq}'
     names = requests.get(url).json()
     return [{'label': name, 'value': name} for name in names]
 
 
-def datapoints(freq, name):
+def get_from_api_datapoints(freq, name):
     url = f'{BASE_URL}/datapoints'
     params = dict(freq=freq, name=name, format='json')
     data = requests.get(url, params).json()
     return data
+#
+# NOT TODO: may also supply data pre-formatted as:
+#             [{
+#                'x': [d['date'] for d in data],
+#                'y': [d['value'] for d in data]
+#            }]
+#    
 
-# NOT TODO: may have additional formatting here
+
+
+# NOT TODO: may have additional formatting for html
 # - centering
 # - sans serif font
 # - header
@@ -61,12 +72,13 @@ app.layout = html.Div([
 ], style={'width': '500'})
 
 
-# NOT TODO: may have default settign for GDP_yoy + q 
+# NOT TODO: may have - when page is loaded, some graph already shows by default  
+#           eg GDP_yoy + q
 
 @app.callback(output=Output('names', component_property='options'), 
               inputs=[Input('frequency', component_property='value')])
 def update_names(freq):
-    return names(freq)
+    return get_from_api_names(freq)
 
 # NOT TODO: similar behaviour can be done with events?
 
@@ -74,7 +86,7 @@ def update_names(freq):
               inputs=[Input('frequency', component_property='value'), 
                       Input('names', component_property='value')])
 def update_graph(freq, name):
-        data = datapoints(freq, name)
+        data =  get_from_api_datapoints(freq, name)
         return {
             'data': [{
                 'x': [d['date'] for d in data],
@@ -85,7 +97,15 @@ def update_graph(freq, name):
 
 # NOT TODO: what tests should be designed for this code?
 
+# NOT TODO: can deploy to heroku?
+
+# NOT TODO: add second variable?
+
+# NOT TODO: newer versions
+# - sections of variables ('GDP Components', 'Prices'...) 
+# - download this data as....
+# - human varname description in Russian/English
+# - more info about variables as text
 
 if __name__ == '__main__':
-    #app.run_server(debug=True)
-    pass
+    app.run_server(debug=True)    
