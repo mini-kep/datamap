@@ -2,13 +2,18 @@
 
 Scenario:
 
-1. select frequency in radio buttons
-  -> frequency selection affects list of indicators
+1. when page is loaded there is one frequency and one indicator selected,
+   one indicator shows on plot 
+    
+2. select frequency in radio buttons
+  -> frequency selection affects list of indicators in drop-down menu 1 and 2
+     (same list there)
   
-2. select indicator by name in drop-down menu 
+3. select indicator 1 by name in drop-down menu 
   -> choosing name affects plot
-  
-3. plot one line as time series
+
+4. select indicator 2 by name in drop-down menu 
+  -> choosing name affects plot
 
 """
 
@@ -25,8 +30,12 @@ app = dash.Dash()
 # NOT TODO: may be a class Data with 
 # - Data.names() 
 # - data.time_series(freq, name) 
+# - frequencies(freq, name)
 
-# NOT TODO: frequencies can  be impoereted from db API
+# NOT TODO: frequencies can be imported from db API
+#           see for example 
+#           <https://minikep-db.herokuapp.com/api/datapoints?name=ABC&freq=z&format=json>
+#
 def frequencies():
     return [
         {'label': 'Annual', 'value': 'a'},
@@ -34,7 +43,6 @@ def frequencies():
         {'label': 'Monthly', 'value': 'm'},        
         {'label': 'Daily', 'value': 'd'}
     ]
-
 
     
 BASE_URL = 'http://minikep-db.herokuapp.com/api'
@@ -50,16 +58,15 @@ def get_from_api_datapoints(freq, name):
     params = dict(freq=freq, name=name, format='json')
     data = requests.get(url, params).json()
     if not isinstance(data, list):
-         # if parameters are invalid, response isn't a jsoned list
+         # if parameters are invalid, response is not a jsoned list
          return []
     return data
-#
-# NOT TODO: may also supply data pre-formatted as:
-#             [{
-#                'x': [d['date'] for d in data],
-#                'y': [d['value'] for d in data]
-#            }]
-#    
+
+def get_time_series_dict(freq, name):
+    data = get_from_api_datapoints(freq, name)
+    return dict(x = [d['date'] for d in data],
+                y = [d['value'] for d in data],
+                name = name)   
 
 # NOT TODO: may have additional formatting for html
 # - centering
@@ -67,29 +74,23 @@ def get_from_api_datapoints(freq, name):
 # - header
     
 # app.layout controls HTML layout of dcc components on page
-# there are three dcc components 
+# there are three dcc components: 
 #  - radio items 
 #  - dropdown menu
-#  - graph with time series
- 
+#  - graph with time series 
 app.layout = html.Div([
     dcc.RadioItems(
         options=frequencies(),
-        value='a',
+        value='q',
         id='frequency'
     ),
-    dcc.Dropdown(id='name1', value="GDP_yoy"),
-    dcc.Dropdown(id='name2'),
+    dcc.Dropdown(id='name1', value = "GDP_yoy"),
+    dcc.Dropdown(id='name2', value = None),
     dcc.Graph(id='time-series-graph')    
 ], style={'width': '500'})
 
 
-# NOT TODO: may have - when page is loaded, some graph already shows by default  
-#           eg GDP_yoy + q
-
-
-# NOT TODO: add second graph
-    
+ 
 @app.callback(output=Output('name1', component_property='options'), 
               inputs=[Input('frequency', component_property='value')])
 def update_names1(freq):
@@ -105,46 +106,34 @@ def update_names2(freq):
 @app.callback(output=Output('time-series-graph', 'figure'),
               inputs=[Input('frequency', component_property='value'), 
                       Input('name1', component_property='value'),
-                      #Input('name2', component_property='value'),                      
+                      Input('name2', component_property='value'),                      
                       ])    
-def update_graph(freq, name1, name2=None):
-        data1 = get_from_api_datapoints(freq, name1)
-        #data2 = get_from_api_datapoints(freq, name2)
-        return {
-            'data': [{
-                'x': [d['date'] for d in data1],
-                'y': [d['value'] for d in data1]
-                 },    
-#    {
-#                'x': [d['date'] for d in data2],
-#                'y': [d['value'] for d in data2]
-#                 }    
-    ],
-            'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}}
-}
-
-
-
-
-
+def update_graph_parameters(freq, name1, name2):
+    layout_dict = dict(margin = {'l': 40, 'r': 0, 't': 20, 'b': 30},
+                       legend = dict(orientation="h"),
+                       showlegend = True)    
+    data_list = [get_time_series_dict(freq, name1)]
+    if name2:
+        data_list.append(get_time_series_dict(freq, name2))
+    return dict(layout=layout_dict, data=data_list) 
 
 # NOT TODO: what tests should be designed for this code?
+#           specifically, how to test for sah components behaviour?
 
 # NOT TODO: can deploy to heroku?
 
 # NOT TODO: add second dropdown menu and secdond variable to graph?
 
-# NOT TODO: newer versions
+# NOT TODO: in newer versions - split this list to priority and requires something
 # - sections of variables ('GDP Components', 'Prices'...) 
 # - download this data as....
 # - human varname description in Russian/English
 # - more info about variables as text
+# - show latest value
 # - link to github <https://github.com/mini-kep/intro>
 
 if __name__ == '__main__':
-    app.run_server(debug=True)    
-    
-    
+    app.run_server(debug=True)         
     
     
 # EP: parts of dash code seem work in progress
