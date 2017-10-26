@@ -1,16 +1,24 @@
+"""Controls and vizualisation for 'mini-kep' dataset using Dash/Plotly
+
+Scenario:
+
+1. select frequency in radio buttons
+  -> frequency selection affects list of indicators
+  
+2. select indicator by name in drop-down menu 
+  -> choosing name affects plot
+  
+3. plot one line as time series
+
+"""
+
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 import requests
 
-"""
-For the vizualisation:
 
-select frequency in radio buttons + frequency selection affects list of indicators
-select indicator by name in drop-down menu + choosing name affects plot
-plot one line as time series
-"""
 
 app = dash.Dash()
 
