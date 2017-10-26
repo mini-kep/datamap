@@ -19,17 +19,15 @@ import dash_html_components as html
 import requests
 
 
-
 app = dash.Dash()
 
 
-
+# NOT TODO: frequencies can  be impoereted from db API
 def frequencies():
     return [
         {'label': 'Annual', 'value': 'a'},
         {'label': 'Quarterly', 'value': 'q'},
-        {'label': 'Monthly', 'value': 'm'},
-        {'label': 'Weekly', 'value': 'w'},
+        {'label': 'Monthly', 'value': 'm'},        
         {'label': 'Daily', 'value': 'd'}
     ]
 
@@ -44,31 +42,37 @@ def names(freq):
 
 def datapoints(freq, name):
     url = f'{BASE_URL}/datapoints'
-    data = requests.get(url, params=dict(
-        freq=freq,
-        name=name,
-        format='json'
-    )).json()
+    params = dict(freq=freq, name=name, format='json')
+    data = requests.get(url, params).json()
     return data
 
-
+# NOT TODO: may have additional formatting here
+# - centering
+# - sans serif font
+# - header
+    
 app.layout = html.Div([
     dcc.RadioItems(
         options=frequencies(),
         id='frequency'
     ),
     dcc.Dropdown(id='names'),
-    dcc.Graph(id='data-graph')
+    dcc.Graph(id='time-series-graph')
 ], style={'width': '500'})
 
 
-@app.callback(Output('names', 'options'), [Input('frequency', 'value')])
+# NOT TODO: may have default settign for GDP_yoy + q 
+
+@app.callback(output=Output('names', component_property='options'), 
+              inputs=[Input('frequency', component_property='value')])
 def update_names(freq):
     return names(freq)
 
+# NOT TODO: similar behaviour can be done with events?
 
-@app.callback(Output('data-graph', 'figure'),
-            [Input('frequency', 'value'), Input('names', 'value')])
+@app.callback(output=Output('time-series-graph', 'figure'),
+              inputs=[Input('frequency', component_property='value'), 
+                      Input('names', component_property='value')])
 def update_graph(freq, name):
         data = datapoints(freq, name)
         return {
@@ -79,6 +83,9 @@ def update_graph(freq, name):
             'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}}
         }
 
+# NOT TODO: what tests should be designed for this code?
+
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    #app.run_server(debug=True)
+    pass
