@@ -22,6 +22,10 @@ import requests
 app = dash.Dash()
 
 
+# NOT TODO: may be a class Data with 
+# - Data.names() 
+# - data.time_series(freq, name) 
+
 # NOT TODO: frequencies can  be impoereted from db API
 def frequencies():
     return [
@@ -32,7 +36,6 @@ def frequencies():
     ]
 
 
-# NOT TODO: may be a class Data with Data.names() and data.time_series(freq, name) 
     
 BASE_URL = 'http://minikep-db.herokuapp.com/api'
 
@@ -55,20 +58,24 @@ def get_from_api_datapoints(freq, name):
 #            }]
 #    
 
-
-
 # NOT TODO: may have additional formatting for html
 # - centering
 # - sans serif font
 # - header
     
+# app.layout controls HTML layout of dcc components on page
+# there are three dcc components 
+#  - radio items 
+#  - dropdown menu
+#  - graph with time series
+ 
 app.layout = html.Div([
     dcc.RadioItems(
         options=frequencies(),
         id='frequency'
     ),
     dcc.Dropdown(id='names'),
-    dcc.Graph(id='time-series-graph')
+    dcc.Graph(id='time-series-graph')    
 ], style={'width': '500'})
 
 
@@ -95,17 +102,45 @@ def update_graph(freq, name):
             'layout': {'margin': {'l': 40, 'r': 0, 't': 20, 'b': 30}}
         }
 
+
+
 # NOT TODO: what tests should be designed for this code?
 
 # NOT TODO: can deploy to heroku?
 
-# NOT TODO: add second variable?
+# NOT TODO: add second dropdown menu and secdond variable to graph?
 
 # NOT TODO: newer versions
 # - sections of variables ('GDP Components', 'Prices'...) 
 # - download this data as....
 # - human varname description in Russian/English
 # - more info about variables as text
+# - link to github <https://github.com/mini-kep/intro>
 
 if __name__ == '__main__':
     app.run_server(debug=True)    
+    
+    
+    
+    
+# EP: parts of dash code seem work in progress
+# > help(app)    
+
+#    class Dash(builtins.object)
+# |  Methods defined here:
+# |  
+# |  __init__(self, name=None, server=None, static_folder=None, url_base_pathname='/', **kwargs)
+# |      Initialize self.  See help(type(self)) for accurate signature.
+# |  
+# |  callback(self, output, inputs=[], state=[], events=[])
+# |      # TODO - Update nomenclature.
+# |      # "Parents" and "Children" should refer to the DOM tree
+# |      # and not the dependency tree.
+# |      # The dependency tree should use the nomenclature
+# |      # "observer" and "controller".
+# |      # "observers" listen for changes from their "controllers". For example,
+# |      # if a graph depends on a dropdown, the graph is the "observer" and the
+# |      # dropdown is a "controller". In this case the graph's "dependency" is
+# |      # the dropdown.
+# |      # TODO - Check this map for recursive or other ill-defined non-tree
+# |      # relationships
