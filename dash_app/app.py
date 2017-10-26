@@ -41,6 +41,9 @@ def datapoints(freq, name):
         name=name,
         format='json'
     )).json()
+    if not isinstance(data, list):
+         # if parameters are invalid, response isn't a jsoned list
+         return []
     return data
 
 
