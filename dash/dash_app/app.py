@@ -22,6 +22,7 @@ from dash.dependencies import Input, Output
 import dash_core_components as dcc
 import dash_html_components as html
 import requests
+import urllib.parse
 
 
 app = dash.Dash()
@@ -53,10 +54,15 @@ def get_from_api_names(freq):
     return [{'label': name, 'value': name} for name in names]
 
 
+def get_datapoints_url(freq, name, format='json'):
+    url = f'{BASE_URL}/datapoints?'
+    params = urllib.parse.urlencode(dict(freq=freq, name=name, format=format))
+    return url + params
+
+
 def get_from_api_datapoints(freq, name):
-    url = f'{BASE_URL}/datapoints'
-    params = dict(freq=freq, name=name, format='json')
-    data = requests.get(url, params).json()
+    url = get_datapoints_url(freq, name)
+    data = requests.get(url).json()
     if not isinstance(data, list):
          # if parameters are invalid, response is not a jsoned list
          return []
@@ -74,10 +80,11 @@ def get_time_series_dict(freq, name):
 # - header
     
 # app.layout controls HTML layout of dcc components on page
-# there are three dcc components: 
+# there are four dcc components:
 #  - radio items 
 #  - dropdown menu
-#  - graph with time series 
+#  - graph with time series
+#  - links to download data
 app.layout = html.Div([
     dcc.RadioItems(
         options=frequencies(),
@@ -86,7 +93,8 @@ app.layout = html.Div([
     ),
     dcc.Dropdown(id='name1', value = "GDP_yoy"),
     dcc.Dropdown(id='name2', value = None),
-    dcc.Graph(id='time-series-graph')    
+    dcc.Graph(id='time-series-graph'),
+    html.Div(id='download-links')
 ], style={'width': '500'})
 
 
@@ -117,6 +125,35 @@ def update_graph_parameters(freq, name1, name2):
         data_list.append(get_time_series_dict(freq, name2))
     return dict(layout=layout_dict, data=data_list) 
 
+
+
+def download_html(freq, name):
+    return html.Div(children=[
+        f'Download data for {name} at {freq}: ',
+        html.A('csv', href=get_datapoints_url(freq, name, 'csv')),
+        ' ',
+        html.A('json', href=get_datapoints_url(freq, name, 'json'))
+    ])
+
+
+@app.callback(output=Output('download-links', 'children'),
+              inputs=[Input('frequency', component_property='value'),
+                      Input('name1', component_property='value'),
+                      Input('name2', component_property='value'),
+                      ])
+def update_graph_parameters(freq, name1, name2):
+    link1 = link2 = None
+    if freq and name1:
+        link1 = download_html(freq, name1)
+    if freq and name2:
+        link2 = download_html(freq, name2)
+    return [
+        link1,
+        html.Br(),
+        link2
+    ]
+
+
 # NOT TODO: what tests should be designed for this code?
 #           specifically, how to test for sah components behaviour?
 
@@ -127,7 +164,7 @@ def update_graph_parameters(freq, name1, name2):
 #
 # Components:
 # - sections of variables ('GDP Components', 'Prices'...) 
-# - download this data as....
+# - download this data as.... [done]
 # - human varname description in Russian/English
 # - more info about variables as text
 # - show latest value
