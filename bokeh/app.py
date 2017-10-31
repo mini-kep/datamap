@@ -17,20 +17,40 @@ FREQUENCIES = OrderedDict([
 
 
 def get_freq(choice: int):
-    return [x for x in FREQUENCIES.values()][choice]
+    """Mapping of an integer index for the active radio button to frequency
+       characters for use with the REST API.
+
+    Args:
+        choice (integer): integers from 0 to 3 corresponding to each button
+    """
+    return list(FREQUENCIES.values())[choice]
 
 
 def get_freq_descriptions():
-    return [x for x in FREQUENCIES.keys()]
+    """The full word version of each frequency; for use as labels for x-axis
+    and the radio buttons.
+    """
+    return list(FREQUENCIES.keys())
 
 
 def names(freq):
+    """Get all the available indicators for a given frequency."""
     url = f'{BASE_URL}/names/{freq}'
     names = requests.get(url).json()
     return names
 
 
 def get_from_api_datapoints(freq, name):
+    """Datapoints can be generated when a frequency and indicator are
+       specified. This is the data which is plotted in the graphs.
+
+    Args:
+        freq (char): Single letter representing a frequency
+        name (str): An indicator variable name, e.g. GDP_yoy
+
+    Returns:
+        Datapoints as a JSON decoded object
+    """
     url = f'{BASE_URL}/datapoints'
     params = dict(freq=freq, name=name, format='json')
     data = requests.get(url, params).json()
@@ -41,12 +61,14 @@ def get_from_api_datapoints(freq, name):
 
 
 def get_time_series_dict(freq, name):
+    """Process data in column form to feed to plot and callback."""
     data = get_from_api_datapoints(freq, name)
     return dict(x=pd.to_datetime([d['date'] for d in data]),
                 y=[d['value'] for d in data])
     
 
 def update_plot(attr, old, new):
+    """Bokeh callback function"""
     # step 1. update names selector based on frequency
     selected_freq = get_freq(freq_select.active)
     indicator_select.options = names(selected_freq)
@@ -57,7 +79,8 @@ def update_plot(attr, old, new):
 
 
 def initialize(initial_name, initial_freq):
-    """
+    """Initialize the plot with default values: 'GDP_yoy' and 'q'.
+
     Returns:
         A bokeh ColumnDataSource with initial data for the plots, and the
         frequency and indicator selector objects to be used with a callback to
