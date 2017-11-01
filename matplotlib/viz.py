@@ -3,10 +3,55 @@
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
+import requests
 
-from config import find_repo_root
+# from config import find_repo_root
 from urllib.parse import urljoin
+from collections import OrderedDict
 
+
+BASE_URL = 'http://minikep-db.herokuapp.com/api'
+
+FREQUENCIES = OrderedDict([
+            ('Annual', 'a'),
+            ('Quarterly', 'q'),
+            ('Monthly', 'm'),
+            ('Daily', 'd')])
+
+
+def names(freq):
+    """Get all the available indicators for a given frequency."""
+    url = f'{BASE_URL}/names/{freq}'
+    names = requests.get(url).json()
+    return names
+
+
+def get_from_api_datapoints(freq, name):
+    """Datapoints can be generated when a frequency and indicator are
+       specified. This is the data which is plotted in the graphs.
+
+    Args:
+        freq (char): Single letter representing a frequency
+        name (str): An indicator variable name, e.g. GDP_yoy
+
+    Returns:
+        Datapoints as a JSON decoded object
+    """
+    url = f'{BASE_URL}/datapoints'
+    params = dict(freq=freq, name=name, format='json')
+    data = requests.get(url, params).json()
+    if not isinstance(data, list):
+         # if parameters are invalid, response is not a jsoned list
+         return []
+    return data
+
+
+def get_time_series(freq, name):
+    data = get_from_api_datapoints(freq, name)
+    index = pd.to_datetime([d['date'] for d in data])
+    values = [d['value'] for d in data]
+    return pd.Series(values, index=index, name=name)
+    
 
 def get_pix_folder(subfolder):
     return find_repo_root() / 'output' / 'png' / subfolder
@@ -206,10 +251,14 @@ def plot_all_dataframes():
 
 if __name__ == "__main__":
 
-    import getter
-    dfa, dfq, dfm = (getter.get_dataframe(freq) for freq in 'aqm')
+    # import getter
+    # dfa, dfq, dfm = (getter.get_dataframe(freq) for freq in 'aqm')
 
-    ts = dfm.CPI_rog
+    annual, quarterly, monthly, daily = (names(freq) for freq in FREQUENCIES.values())
+
+
+
+    ts = get_time_series('q', 'CPI_rog')
     s = Spline(ts)
     c = Chart(ts, 'name2')
 
@@ -219,11 +268,14 @@ if __name__ == "__main__":
     varnames = ['RETAIL_SALES_FOOD_bln_rub',
                 'RETAIL_SALES_NONFOOD_bln_rub'
                 ]
-    df = dfm[varnames]
+    # df = dfm[varnames]
+    df = pd.concat([get_time_series('q', name) for name in varnames], axis=1,
+            keys=varnames)
+    print(df)
     v = ChartStack(df)
     # v.plot()
 
-    d = ChartDF(dfq[varnames])
+    # d = ChartDF(dfq[varnames])
     # d.plot
 
     qv = ['GDP_rog'
@@ -240,5 +292,5 @@ if __name__ == "__main__":
           'IMPORT_GOODS_bln_usd']
     # RUR_USD_eop
 
-    charts = [Chart(dfm[name]) for name in mv]
-    md = [z.as_markdown() for z in charts]
+    # charts = [Chart(dfm[name]) for name in mv]
+    # md = [z.as_markdown() for z in charts]
