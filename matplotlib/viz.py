@@ -3,54 +3,24 @@
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests
-
-from collections import OrderedDict
 
 
-BASE_URL = 'http://minikep-db.herokuapp.com/api'
-
-FREQUENCIES = OrderedDict([
-            ('Annual', 'a'),
-            ('Quarterly', 'q'),
-            ('Monthly', 'm'),
-            ('Daily', 'd')])
+def make_url(freq, name):    
+    return ('https://minikep-db.herokuapp.com/api/'
+           f'datapoints?name={name}&freq={freq}')
 
 
-def names(freq: str):
-    """Get all time series names for a given frequency *freq*."""
-    url = f'{BASE_URL}/names/{freq}'
-    return requests.get(url).json()
+def read_ts_from_url(source_url):
+	"""Read pandas time series from *source_url*."""
+	return pd.read_csv(source_url, 
+                       converters={0: pd.to_datetime}, 
+                       index_col=0,
+                       squeeze=True)
 
+def get_ts(freq, name):
+    url = make_url(freq, name)
+    return read_ts_from_url(url)
 
-def get_from_api_datapoints(freq, name):
-    """Return data for variable *name* and frequency *freq*.
- 
-    Args:
-        freq (str): single letter representing a frequency, ex: 'a'
-        name (str): time series name, ex: 'GDP_yoy'
-
-    Returns:
-        list of dictionaries like 
-        [{'date': '1999-12-31', 'freq': 'a', 'name': 'GDP_yoy', 'value': 106.4},
-          ...
-          ]
-    """
-    url = f'{BASE_URL}/datapoints'
-    params = dict(freq=freq, name=name, format='json')
-    data = requests.get(url, params).json()
-    # if parameters are invalid, response is not a jsoned list
-    if not isinstance(data, list):
-        return []
-    return data
-
-
-def get_time_series(freq, name):
-    data = get_from_api_datapoints(freq, name)
-    index = pd.to_datetime([d['date'] for d in data])
-    values = [d['value'] for d in data]
-    return pd.Series(values, index=index, name=name)
-    
 
 start = datetime.date(1998, 12, 31)
 end = datetime.date(2017, 12, 31)
@@ -71,13 +41,6 @@ INDICATOR_GPARAMS = {'timerange': DEFAULT_TIMERANGE,
                      'facecolor': 'white',
                      'auto_x': False,
                      'axis_on': True}
-
-# TODO: we need some nice way to decide at what frequency
-#      a time series or a dataframe and return 'a', 'q' or 'm'
-#      maybe take first element of the dataframe index add
-#      ofsset for month, qtr and year and see which oth them
-#      hits the second element in graph
-
 
 def get_frequency(ts):
     """Returns the frequency of a timeseries or dataframe.
@@ -149,9 +112,9 @@ class ChartStack(GraphBase):
 
 if __name__ == "__main__":
 
-    ts = get_time_series('q', 'CPI_rog')
+    ts = get_ts('q', 'CPI_rog')
     s = Spline(ts)
-    c = Chart(ts, 'name2')
+    c = Chart(ts)
 
     s.plot()
     c.plot()
@@ -160,7 +123,7 @@ if __name__ == "__main__":
                 'RETAIL_SALES_NONFOOD_bln_rub',
                 'RETAIL_SALES_bln_rub'
                 ]
-    df = pd.concat([get_time_series('q', name) for name in varnames], axis=1,
+    df = pd.concat([get_ts('q', name) for name in varnames], axis=1,
             keys=varnames)
     v = ChartStack(df)
     v.plot()
