@@ -17,30 +17,31 @@ FREQUENCIES = OrderedDict([
             ('Daily', 'd')])
 
 
-def names(freq):
-    """Get all the available indicators for a given frequency."""
+def names(freq: str):
+    """Get all time series names for a given frequency *freq*."""
     url = f'{BASE_URL}/names/{freq}'
-    names = requests.get(url).json()
-    return names
+    return requests.get(url).json()
 
 
 def get_from_api_datapoints(freq, name):
-    """Datapoints can be generated when a frequency and indicator are
-       specified. This is the data which is plotted in the graphs.
-
+    """Return data for variable *name* and frequency *freq*.
+ 
     Args:
-        freq (char): Single letter representing a frequency
-        name (str): An indicator variable name, e.g. GDP_yoy
+        freq (str): single letter representing a frequency, ex: 'a'
+        name (str): time series name, ex: 'GDP_yoy'
 
     Returns:
-        Datapoints as a JSON decoded object
+        list of dictionaries like 
+        [{'date': '1999-12-31', 'freq': 'a', 'name': 'GDP_yoy', 'value': 106.4},
+          ...
+          ]
     """
     url = f'{BASE_URL}/datapoints'
     params = dict(freq=freq, name=name, format='json')
     data = requests.get(url, params).json()
+    # if parameters are invalid, response is not a jsoned list
     if not isinstance(data, list):
-         # if parameters are invalid, response is not a jsoned list
-         return []
+        return []
     return data
 
 
