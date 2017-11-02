@@ -31,6 +31,10 @@ def get_df(freq, *names):
 df = get_df('a', 'GDP_yoy', 'CPI_rog')  
 assert isinstance(df, pd.DataFrame)
 
+# this fails
+# a = ['GDP_yoy', 'INDPRO_rog', 'INVESTMENT_rog']
+
+
 start = datetime.date(1998, 12, 31)
 end = datetime.date(2017, 12, 31)
 DEFAULT_TIMERANGE = start, end
