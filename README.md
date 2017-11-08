@@ -28,8 +28,7 @@ O - missing observation
 # Download data 
 
 For full dataset data download can use [this code - query_all.py](https://github.com/mini-kep/user-charts/blob/master/query_all.py)
-
 `query_all.py` originally used as a load test and runs about 1 min. 
 
-To construct one dataframe based on individual timeseries for same frequency can use `get_df()` 
+To construct one dataframe based on individual time series for the ame frequency can use `get_df()` 
 [from viz.py](https://github.com/mini-kep/user-charts/blob/8f75d15c855b1d59873ee8d3c8e0dcbf9651514e/viz.py#L24-L29).
