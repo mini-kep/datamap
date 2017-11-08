@@ -16,7 +16,8 @@ IMPORT_GOODS_usd_bln | *************************
 O - missing observation
 ```
 
-Possible incosistencies in dataset:
+# Possible incosistencies in dataset
+
 - time series may start on different dates (it's ok)
 - time series not downloaded fully - errors in parsing or upload - will have an omission inside
 - some monthly parser not invoked and data not loaded 
@@ -24,5 +25,9 @@ Possible incosistencies in dataset:
 - daily data can be reported on wierd dates (USDRUR_CB is published next day, eg Saturday for Friday data)
 - other errors we do not know yet
 
+# Download data 
+
 For full dataset data download can use [this code - query_all.py](https://github.com/mini-kep/user-charts/blob/master/query_all.py)
-`query_all.py` originally used as a load test and in runs about 1 min.  
+
+`query_all.py` originally used as a load test and runs about 1 min. May need to construct one dataframe base don individual timeseries for each frequency.
+
