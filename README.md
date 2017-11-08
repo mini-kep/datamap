@@ -16,7 +16,7 @@ IMPORT_GOODS_usd_bln | *************************
 O - missing observation
 ```
 
-# Possible incosistencies in dataset
+# Possible incosistencies
 
 - time series may start on different dates (it's ok)
 - time series not downloaded fully - errors in parsing or upload - will have an omission inside
