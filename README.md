@@ -5,13 +5,13 @@ Use [missingno](https://github.com/ResidentMario/missingno) library to demonstra
 Rough prototype:
 ```
 Annual('a') frequency map:
------------------------------------------------------
-GDP_yoy              |    ****************O********
-CPI_rog              |    ****************O********
+------------------------------------------------------------
+GDP_yoy              |    ****************O*************
+CPI_rog              |    ****************O*************
 EXPORT_GOODS_usd_bln | ************************O
 IMPORT_GOODS_usd_bln | *************************
------------------------------------------------------
-                     1999 2016
+------------------------------------------------------------
+                       1999                            2016
 
 O - missing observation
 ```
@@ -29,5 +29,7 @@ O - missing observation
 
 For full dataset data download can use [this code - query_all.py](https://github.com/mini-kep/user-charts/blob/master/query_all.py)
 
-`query_all.py` originally used as a load test and runs about 1 min. May need to construct one dataframe base don individual timeseries for each frequency.
+`query_all.py` originally used as a load test and runs about 1 min. 
 
+To construct one dataframe based on individual timeseries for same frequency can use `get_df()` 
+[from viz.py](https://github.com/mini-kep/user-charts/blob/8f75d15c855b1d59873ee8d3c8e0dcbf9651514e/viz.py#L24-L29).
